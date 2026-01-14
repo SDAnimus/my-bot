@@ -4,25 +4,22 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 import yt_dlp
 
-# التوكن حيجي من Environment Variables في Railway
 TOKEN = os.getenv("TOKEN")
 
 if not TOKEN:
-    raise RuntimeError("❌ TOKEN غير موجود في Variables. أضف TOKEN في Railway Variables!")
+    raise RuntimeError("TOKEN not found in Environment Variables!")
 
 async def download_video(url):
     ydl_opts = {
         'format': 'best',
-        'outtmpl': 'video.mp4',  # اسم الملف بعد التحميل
+        'outtmpl': 'video.mp4',
         'quiet': True,
         'no_warnings': True,
     }
 
-    # لو الفيديو موجود من قبل، نحذفه
     if os.path.exists('video.mp4'):
         os.remove('video.mp4')
 
-    # تحميل الفيديو
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
@@ -33,25 +30,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if "http" in url:
         sent_message = await update.message.reply_text(
-            "جاري التحميل بواسطة SDムAnimusジ... ⏳"
+            "Downloading... ⏳"
         )
         try:
             video_file = await download_video(url)
-            await update.message.reply_video(
-                video=open(video_file, 'rb'),
-                caption="✅ تم التحميل بنجاح!"
-            )
-            os.remove(video_file)
-            await sent_message.delete()
-        except Exception as e:
-            await update.message.reply_text(f"❌ حدث خطأ: {e}")
-    else:
-        await update.message.reply_text(
-            "يا بطل، أرسل رابط فيديو صحيح من يوتيوب أو تيك توك."
-        )
-
-if __name__ == '__main__':
-    print("--- البوت شغال الآن وجاهز للاستخدام ---")
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
