@@ -4,35 +4,51 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 import yt_dlp
 
-# التوكن الخاص بك تم وضعه هنا بنجاح
-TOKEN = '8238603979:AAFRHawba5MasoSzPsvNwY5cXAVFYnirScE'
+# التوكن حيجي من Environment Variables في Railway
+TOKEN = os.getenv("TOKEN")
+
+if not TOKEN:
+    raise RuntimeError("❌ TOKEN غير موجود في Variables. أضف TOKEN في Railway Variables!")
 
 async def download_video(url):
     ydl_opts = {
         'format': 'best',
-        'outtmpl': 'video.mp4',
+        'outtmpl': 'video.mp4',  # اسم الملف بعد التحميل
         'quiet': True,
         'no_warnings': True,
     }
+
+    # لو الفيديو موجود من قبل، نحذفه
     if os.path.exists('video.mp4'):
         os.remove('video.mp4')
+
+    # تحميل الفيديو
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
+
     return 'video.mp4'
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
+
     if "http" in url:
-        sent_message = await update.message.reply_text("جاري التحميل بواسطة SDムAnimusジ... ⏳")
+        sent_message = await update.message.reply_text(
+            "جاري التحميل بواسطة SDムAnimusジ... ⏳"
+        )
         try:
             video_file = await download_video(url)
-            await update.message.reply_video(video=open(video_file, 'rb'), caption="✅ تم التحميل بنجاح!")
+            await update.message.reply_video(
+                video=open(video_file, 'rb'),
+                caption="✅ تم التحميل بنجاح!"
+            )
             os.remove(video_file)
             await sent_message.delete()
         except Exception as e:
             await update.message.reply_text(f"❌ حدث خطأ: {e}")
     else:
-        await update.message.reply_text("يا بطل، أرسل رابط فيديو صحيح من يوتيوب أو تيك توك.")
+        await update.message.reply_text(
+            "يا بطل، أرسل رابط فيديو صحيح من يوتيوب أو تيك توك."
+        )
 
 if __name__ == '__main__':
     print("--- البوت شغال الآن وجاهز للاستخدام ---")
