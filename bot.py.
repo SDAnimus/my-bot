@@ -1,0 +1,41 @@
+import os
+import asyncio
+from telegram import Update
+from telegram.ext import Application, MessageHandler, filters, ContextTypes
+import yt_dlp
+
+# التوكن الخاص بك تم وضعه هنا بنجاح
+TOKEN = '8238603979:AAFRHawba5MasoSzPsvNwY5cXAVFYnirScE'
+
+async def download_video(url):
+    ydl_opts = {
+        'format': 'best',
+        'outtmpl': 'video.mp4',
+        'quiet': True,
+        'no_warnings': True,
+    }
+    if os.path.exists('video.mp4'):
+        os.remove('video.mp4')
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+    return 'video.mp4'
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    url = update.message.text
+    if "http" in url:
+        sent_message = await update.message.reply_text("جاري التحميل بواسطة SDムAnimusジ... ⏳")
+        try:
+            video_file = await download_video(url)
+            await update.message.reply_video(video=open(video_file, 'rb'), caption="✅ تم التحميل بنجاح!")
+            os.remove(video_file)
+            await sent_message.delete()
+        except Exception as e:
+            await update.message.reply_text(f"❌ حدث خطأ: {e}")
+    else:
+        await update.message.reply_text("يا بطل، أرسل رابط فيديو صحيح من يوتيوب أو تيك توك.")
+
+if __name__ == '__main__':
+    print("--- البوت شغال الآن وجاهز للاستخدام ---")
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.run_polling()
