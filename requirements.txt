@@ -1,0 +1,17 @@
+anyio==4.12.1
+certifi==2026.1.4
+charset-normalizer==3.4.4
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.11
+instagrapi==2.2.1
+numpy @ file:///home/runner/.termux-build/python-numpy/src/dist/numpy-2.2.5-cp312-cp312-linux_aarch64.whl#sha256=b28ce81b8c071c0f1f798027067c41c371aba2bf5b29a6649f10dd35a09ce4b1
+pycryptodome==3.23.0
+python-telegram-bot==22.5
+requests==2.32.5
+setuptools==80.9.0
+typing_extensions==4.15.0
+urllib3==2.6.3
+wheel==0.45.1
+yt-dlp==2025.12.8
